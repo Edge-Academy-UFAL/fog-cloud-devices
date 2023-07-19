@@ -12,7 +12,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         data = s.recv(1048576)
         print(f'receieved {data}')
 
-        with open('../../sender/first-iteration/key.key', 'r') as file:
+        with open('key.key', 'r') as file:
             key = file.read()
 
         fernet = Fernet(key)
