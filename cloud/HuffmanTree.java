@@ -17,7 +17,7 @@ public class HuffmanTree {
         boolean ended = false;
         while (true) {
             b = (byte)fis.read();
-            
+            b = (byte)(b ^ 0b11111111);
 
             for (int j = 7; j >= 0; j--){
                 if (i == fileLen - 1 && j < trashBits) {
@@ -48,7 +48,7 @@ public class HuffmanTree {
     private TreeNode assembleRecursive(TreeNode parent, InputStream fis, IntHolder i, int len) throws IOException {
         if (i.i >= len) return null;
         
-        byte b = (byte)fis.read();
+        byte b = (byte)(fis.read() ^ 0b11111111);
         i.i++;
 
         boolean isLeaf = (b != (byte)'*');

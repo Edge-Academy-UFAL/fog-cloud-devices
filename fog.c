@@ -240,6 +240,7 @@ void send_to_cloud(byte content[], ll content_len) {
     // Send a message to the server
     // printf("sending %d bytes\n", content_len);
     for (ll i = 0 ; i < content_len; i++) {
+        content[i] = (content[i] ^ 0b11111111);
         printf("%c", content[i]);
     }
     printf("\n\n");
@@ -292,9 +293,6 @@ void compress_file_and_send(byte buffer[], ll file_len) {
     for (short i = 0; i < MAX_BYTES; i++) {
         memset(paths[i], 0, 17);
     }
-
-    FILE *f = fopen("compacted.huff", "wb");
-    fwrite(compacted_file, 1, total_size, f);
 
     send_to_cloud(compacted_file, total_size);
 }
