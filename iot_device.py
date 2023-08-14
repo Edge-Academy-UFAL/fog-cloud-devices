@@ -9,7 +9,7 @@ PORT = 65431
 
 def get_random_pokemon():
     id = randint(1, 150)
-    url = URL + id
+    url = URL + str(id)
     
     return json.dumps(get(url).json())
 
@@ -23,11 +23,12 @@ if __name__ == '__main__':
 
         pokemon: str = get_random_pokemon()
         sock.sendall(pokemon.encode())
+        print(f'number of bytes sent: {len(pokemon)}')
     except ConnectionRefusedError:
         print("Connection refused. Make sure the server is running.")
     except Exception as e:
         print("Error occurred:", e)
     finally:
-        socket.close()
+        sock.close()
         print("Connection closed.")
     

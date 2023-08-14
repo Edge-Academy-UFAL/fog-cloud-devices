@@ -37,6 +37,7 @@ public class SocketHandlerThread extends Thread {
             String result = ht.decompress(inputStream, treeLen, contentLen, trashBits);
             
             System.out.println(result);
+            System.out.println("size is " + result.length());
 
             inputStream.close();
             this.socket.close();

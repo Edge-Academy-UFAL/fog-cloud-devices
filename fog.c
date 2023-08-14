@@ -243,7 +243,7 @@ void send_to_cloud(byte content[], ll content_len) {
         content[i] = (content[i] ^ 0b11111111);
         printf("%c", content[i]);
     }
-    printf("\n\n");
+    printf("\nnumber of bytes sent: %d\n", content_len);
 
     send(sockfd, content, content_len, 0);
 
@@ -297,31 +297,70 @@ void compress_file_and_send(byte buffer[], ll file_len) {
     send_to_cloud(compacted_file, total_size);
 }
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("Please specify what must be sent to the cloud like so:\n");
-        printf("\t./fog <name of file and extension>\n");
-        return 0;
+int listen_to_iot() {
+    const int SERVER_PORT = 65431;
+    const char* SERVER_IP = "localhost";
+
+    // Create a socket
+    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_socket == -1) {
+        perror("Socket creation failed");
+        return 1;
     }
 
-    FILE *file = fopen(argv[1], "rb");
+    // Bind the socket to a specific address and port
+    struct sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(SERVER_PORT);
+    server_address.sin_addr.s_addr = INADDR_ANY;
 
-    if (file == NULL) {
-        printf("File not found\n");
-        return 0;
+    if (bind(server_socket, (struct sockaddr*)&server_address, sizeof(server_address)) == -1) {
+        perror("Bind failed");
+        close(server_socket);
+        return 1;
     }
 
-    ll file_len;
-    fseek(file, 0, SEEK_END);
-    file_len = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    // Listen for incoming connections
+    if (listen(server_socket, 5) == -1) {
+        perror("Listen failed");
+        close(server_socket);
+        return 1;
+    }
 
-    byte buffer[file_len];
-    fread(buffer, 1, file_len, file);
+    printf("Server listening on %s:%d\n", SERVER_IP, SERVER_PORT);
 
-    fclose(file);
+    while (1) {
+        // Accept a client connection
+        struct sockaddr_in client_address;
+        socklen_t client_address_length = sizeof(client_address);
+        int client_socket = accept(server_socket, (struct sockaddr*)&client_address, &client_address_length);
+        if (client_socket == -1) {
+            perror("Accept failed");
+            continue;
+        }
 
-    compress_file_and_send(buffer, file_len);
+        byte buffer[BUFFER_SIZE] = {0};
+        ll total_bytes_received = 0;
+        while (1) {
+            ssize_t bytes_received = recv(client_socket, buffer + total_bytes_received, sizeof(buffer), 0);
+            if (bytes_received <= 0) {
+                break;
+            } else {
+                total_bytes_received += bytes_received;
+            }
+        }
 
+        compress_file_and_send(buffer, total_bytes_received);
+
+        // Close the client socket
+        close(client_socket);
+    }
+
+    // Close the server socket
+    close(server_socket);
+}
+
+int main() {
+    listen_to_iot();
     return 0;
 }
