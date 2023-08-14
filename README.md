@@ -4,7 +4,7 @@ This repository contains code that emulates IoT, Fog and Cloud devices, commonly
 
 ## IoT Device
 
-For testing purposes, the IoT Device sript sends a JSON file containing information about a random 1º generation Pokemon. This data is obtained through an API request to PokeAPI. This data is then sent to the Fog through the 65431 port.
+For testing purposes, the IoT Device sript sends a JSON file containing information about a random 1º generation Pokemon. This data is obtained through an API request to PokeAPI (https://pokeapi.co/). This data is then sent to the Fog through the 65431 port.
 
 Python was used for its simplicity, since the script's main purpose is sending data, which means that there's no specifically right programming language for this purpose.
 
